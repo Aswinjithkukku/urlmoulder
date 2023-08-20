@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math/rand"
+	"os"
 
 	"github.com/aswinjithkukku/url-moulder/models"
 )
@@ -27,5 +28,5 @@ func GenerateRandomString(length int, urls []models.Urls) (string, bool) {
 		}
 	}
 
-	return "https://urlmoulder/" + generatedString, isExist
+	return os.Getenv("URL_DOM") + generatedString, isExist
 }

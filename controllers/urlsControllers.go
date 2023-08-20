@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 
@@ -99,4 +101,23 @@ func AddUrl(c *gin.Context) {
 		"url":    url,
 		"info":   "Your generated Url will expire within 7 Days",
 	})
+}
+
+// Patch or give data to user.
+func GiveRedirectionOutput(c *gin.Context) {
+	slug := c.Param("slug")
+
+	var url models.Urls
+	fmt.Println(os.Getenv("URL_DOM") + slug)
+	result := initializer.DB.First(&url, "slug_url = ?", os.Getenv("URL_DOM")+slug)
+
+	if result.Error != nil || result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"status": false,
+			"error":  "Could not find the Url",
+		})
+		return
+	}
+	// c.JSON(http.StatusOK, "OK")
+	c.Redirect(http.StatusPermanentRedirect, url.Url)
 }

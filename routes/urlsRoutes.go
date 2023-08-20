@@ -10,5 +10,6 @@ func UrlsRoutes(router *gin.Engine) {
 	{
 		urls.GET("/all", controllers.GetAllUrls)
 		urls.POST("/add", controllers.AddUrl)
+		urls.GET("/:slug", controllers.GiveRedirectionOutput)
 	}
 }

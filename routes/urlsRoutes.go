@@ -7,9 +7,9 @@ import (
 
 func UrlsRoutes(router *gin.Engine) {
 	urls := router.Group("/api/url")
+	router.GET("/:slug", controllers.GiveRedirectionOutput)
 	{
 		urls.GET("/all", controllers.GetAllUrls)
 		urls.POST("/add", controllers.AddUrl)
-		urls.GET("/:slug", controllers.GiveRedirectionOutput)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/aswinjithkukku/url-moulder/controllers"
 	"github.com/aswinjithkukku/url-moulder/initializer"
 	"github.com/aswinjithkukku/url-moulder/routes"
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,8 @@ func main() {
 	fmt.Println("Hello world")
 
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/**")
+	r.GET("/", controllers.Home)
 
 	routes.UrlsRoutes(r)
 

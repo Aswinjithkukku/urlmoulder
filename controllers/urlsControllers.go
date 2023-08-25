@@ -13,6 +13,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Home Url
+func Home(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", nil)
+}
+
 // Get all possible urls.
 func GetAllUrls(c *gin.Context) {
 	var urls []models.Urls
@@ -35,8 +40,7 @@ func GetAllUrls(c *gin.Context) {
 
 // Add url.
 func AddUrl(c *gin.Context) {
-	var body string
-
+	body := c.PostForm("value")
 	if err := c.ShouldBind(&body); err != nil {
 		c.JSON(http.StatusNotAcceptable, gin.H{
 			"status": false,
@@ -45,7 +49,7 @@ func AddUrl(c *gin.Context) {
 		return
 	}
 
-	urlRegex := regexp.MustCompile(`^(https?|ftp)://[^\s/$.?#].[^\s]*$`)
+	urlRegex := regexp.MustCompile(`^(https?://|localhost:\d{4}//).*$`)
 	if !urlRegex.MatchString(body) {
 		c.JSON(http.StatusNotAcceptable, gin.H{
 			"status": false,
@@ -103,13 +107,13 @@ func AddUrl(c *gin.Context) {
 	})
 }
 
-// Patch or give data to user.
+// Give data to user and Redirect.
 func GiveRedirectionOutput(c *gin.Context) {
 	slug := c.Param("slug")
 
 	var url models.Urls
 	fmt.Println(os.Getenv("URL_DOM") + slug)
-	result := initializer.DB.First(&url, "slug_url = ?", os.Getenv("URL_DOM")+slug)
+	result := initializer.DB.First(&url, "slug_url = ? AND is_expired = ?", slug, false)
 
 	if result.Error != nil || result.RowsAffected == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -118,6 +122,15 @@ func GiveRedirectionOutput(c *gin.Context) {
 		})
 		return
 	}
-	// c.JSON(http.StatusOK, "OK")
+
+	if url.ExpireDate.Before(time.Now()) {
+		url.IsExpired = true
+		initializer.DB.Save(&url)
+		c.JSON(http.StatusForbidden, gin.H{
+			"status": false,
+			"error":  "Sorry!! the link you looking for is Expired. Please Generate another url.",
+		})
+		return
+	}
 	c.Redirect(http.StatusPermanentRedirect, url.Url)
 }
